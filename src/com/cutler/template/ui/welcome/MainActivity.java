@@ -1,9 +1,9 @@
 package com.cutler.template.ui.welcome;
 
-import com.cutler.template.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import com.cutler.template.R;
 
 public class MainActivity extends Activity {
 	@Override
