@@ -9,6 +9,15 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
+import com.cutler.template.common.media.cache.MediaCache;
+import com.cutler.template.common.media.cache.MediaSizeEstimator;
+import com.cutler.template.common.media.fetcher.HttpMediaFetcher;
+import com.cutler.template.common.media.fetcher.AbstractMediaFetcher;
+import com.cutler.template.common.media.fetcher.MediaFetcherFactory;
+import com.cutler.template.common.media.goal.ImageViewGoal;
+import com.cutler.template.common.media.goal.AbstractMediaFetchingGoal;
+import com.cutler.template.common.media.goal.SyncGoal;
+import com.cutler.template.common.media.model.MediaFetchingJob;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 public class MediaManager {
@@ -55,7 +64,7 @@ public class MediaManager {
 	 * @param goal
 	 * @param bypass
 	 */
-	public void loadMedia(Context ctx,final String desc,MediaFetchingGoal goal,boolean bypass){
+	public void loadMedia(Context ctx,final String desc,AbstractMediaFetchingGoal goal,boolean bypass){
 		Object media = memoryCache.get(desc);
 		if(media == null) {
 			synchronized (this) {
@@ -67,7 +76,7 @@ public class MediaManager {
 					} else {
 						job = new MediaFetchingJob(desc,goal,bypass);
 						workers.put(desc, job);
-						final MediaFetcher fetcher = MediaFetcherFactory.createFetcher(ctx,desc) ;
+						final AbstractMediaFetcher fetcher = MediaFetcherFactory.createFetcher(ctx,desc) ;
 						if(fetcher != null){	
 							// 在内存缓存中腾出一定的空间，以便加载新任务。
 							reserveMemory(fetcher.getEstimatedMemorySize());
@@ -98,7 +107,7 @@ public class MediaManager {
 	 * @param goal
 	 * @param bypass
 	 */
-	public void loadMedia(Context ctx,int resId,MediaFetchingGoal goal,boolean bypass){
+	public void loadMedia(Context ctx,int resId,AbstractMediaFetchingGoal goal,boolean bypass){
 		loadMedia(ctx, RES_SCHEMA+resId, goal, bypass);
 	}
 	
@@ -240,7 +249,7 @@ public class MediaManager {
 			memoryCache.reserveMemory(MediaSizeEstimator.estimateMediaSize(media));
 		}
 		if (job != null && job.getGoals() != null) {
-			for(MediaFetchingGoal goal : job.getGoals()){
+			for(AbstractMediaFetchingGoal goal : job.getGoals()){
 				if (goal != null) {
 					goal.onFetched(success, media);
 				}
@@ -257,7 +266,7 @@ public class MediaManager {
 	public synchronized void notifyFetchingProgress(String desc,int curSize,int totalSize){
 		MediaFetchingJob job = workers.get(desc);
 		if(job != null) {
-			for(MediaFetchingGoal goal : job.getGoals()) {
+			for(AbstractMediaFetchingGoal goal : job.getGoals()) {
 				if( goal != null){
 					goal.onFetchingProgress(curSize, totalSize);
 				}
@@ -282,7 +291,7 @@ public class MediaManager {
 	public synchronized boolean checkToCancel(String desc){
 		MediaFetchingJob job = workers.get(desc);
 		if(job != null){
-			for(MediaFetchingGoal goal : job.getGoals()) {
+			for(AbstractMediaFetchingGoal goal : job.getGoals()) {
 				if(goal == null || goal.isActive()) {
 					return false;
 				}
