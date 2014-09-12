@@ -25,6 +25,7 @@ import com.cutler.template.R;
 import com.cutler.template.common.Config;
 import com.cutler.template.util.CryptoUtil;
 import com.cutler.template.util.IOUtil;
+import com.cutler.template.util.StorageUtils;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
 
@@ -59,7 +60,7 @@ public class HttpMediaFetcher extends AbstractMediaFetcher {
 	
 	private static void initDiskLruCache() {
 		try {
-			mDiskLruCache = DiskLruCache.open(IOUtil.getDiskCacheDir(MainApplication.getInstance(), "media"), 1, 1, Config.DISK_CACHE_SIZE);
+			mDiskLruCache = DiskLruCache.open(StorageUtils.getDiskCacheDir(MainApplication.getInstance(), Config.CACHE_MEDIA), 1, 1, Config.DISK_CACHE_SIZE);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Toast.makeText(MainApplication.getInstance(),

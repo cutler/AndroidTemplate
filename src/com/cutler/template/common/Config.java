@@ -17,6 +17,9 @@ public class Config {
 	public static final int DISK_CACHE_SIZE = 50 * 1024 * 1024;
 	public static final int IO_BUFFER_SIZE = 8 * 1024;
 	public static final int HTTP_DOWNLOAD_THREAD_POOL_SIZE = 3;
+	// 本地的缓存目录
+	public static final String CACHE_MEDIA = "media";
+	public static final String CACHE_APK = "apk";
 	
 	/**
 	 * 下载模块相关的常量

@@ -1,7 +1,7 @@
 
 package com.cutler.template.common.download.goal;
 
-import com.cutler.template.common.download.DownloadTask;
+import com.cutler.template.common.download.model.DownloadTask;
 
 /**
  * 下载相关的回调方法。

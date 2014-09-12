@@ -1,16 +1,9 @@
 package com.cutler.template.util;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import com.cutler.template.MainApplication;
-
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.os.Environment;
 
 
 /**
@@ -134,64 +127,4 @@ public class IOUtil {
 		}
 	}
 	
-	/**
-	 * Get a usable cache directory (external if available, internal otherwise).
-	 * 
-	 * @param context
-	 *            The context to use
-	 * @param uniqueName
-	 *            A unique directory name to append to the cache dir
-	 * @return The cache dir
-	 */
-	public static File getDiskCacheDir(Context context, String uniqueName) {
-        File cacheFile = null;
-        try{
-            String cachePath = null;
-            if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || !isExternalStorageRemovable()){
-            	cachePath = getExternalCacheDir(context).getPath();
-            } else {
-            	cachePath = context.getCacheDir().getPath();
-            }
-            cacheFile = new File(cachePath + File.separator + uniqueName);
-        } catch(Exception e) {
-              e.printStackTrace();
-              if(context == null){ 
-                  context = MainApplication.getInstance();
-              }
-              cacheFile = new File(context.getCacheDir().getPath() + File.separator + uniqueName);
-        }
-        return cacheFile ;
-	}
-
-	/**
-	 * Check if external storage is built-in or removable.
-	 * 
-	 * @return True if external storage is removable (like an SD card), false
-	 *         otherwise.
-	 */
-	@TargetApi(9)
-	public static boolean isExternalStorageRemovable() {
-		if (Utils.hasGingerbread()) {
-			return Environment.isExternalStorageRemovable();
-		}
-		return true;
-	}
-
-	/**
-	 * Get the external app cache directory.
-	 * 
-	 * @param context
-	 *            The context to use
-	 * @return The external cache dir
-	 */
-	@TargetApi(8)
-	public static File getExternalCacheDir(Context context) {
-		if (Utils.hasFroyo()) {
-			return context.getExternalCacheDir();
-		}
-
-		// Before Froyo we need to construct the external cache dir ourselves
-		final String cacheDir = "/Android/data/" + context.getPackageName() + "/cache/";
-		return new File(Environment.getExternalStorageDirectory().getPath() + cacheDir);
-	}
 }

@@ -24,6 +24,21 @@ import android.text.TextUtils;
 public class ShortcutUtil {
 	
 	/**
+	 * 快捷方式已经存在，并且是当前应用程序创建出来的。
+	 */
+	public static final int STATE_EXIST_AND_IS_SELF = 1;
+	
+	/**
+	 * 快捷方式已经存在，但是是其他应用程序创建出来的。
+	 */
+	public static final int STATE_EXIST_AND_IS_OTHER = 2;
+	
+	/**
+	 * 快捷方式不存在。
+	 */
+	public static final int STATE_NOT_EXIST = 3;
+	
+	/**
 	 * 在桌面上创建一个快捷方式。
 	 * @param context
 	 * @param clazz 点击快捷方式后，要启动的Activity
@@ -98,17 +113,23 @@ public class ShortcutUtil {
 	 * @param textResId	快捷方式的标题
 	 * @return
 	 */
-	public static boolean hasShortcut(Context context, int textResId){
-        boolean isInstallShortcut = false;
+	public static int hasShortcut(Context context, int textResId){
+        int state = STATE_NOT_EXIST;
         String AUTHORITY = getAuthorityFromPermission(context, "com.android.launcher.permission.READ_SETTINGS");
         Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/favorites?notify=true");
         Cursor cursor = context.getContentResolver().query(CONTENT_URI,
-                new String[]{ "title", "iconResource" }, "title=?",
+                new String[]{ "title","intent"}, "title=?",
                 new String[]{context.getString(textResId)}, null);
-        if (cursor != null && cursor.getCount() > 0) {
-        	isInstallShortcut = true;
+        while (cursor != null && cursor.moveToNext()) {
+        	String intent = new String(cursor.getString(cursor.getColumnIndex("intent")));
+        	if(intent.indexOf(context.getPackageName()) >= 0){
+        		state = STATE_EXIST_AND_IS_SELF;
+        		break;
+        	} else {
+        		state = STATE_EXIST_AND_IS_OTHER;
+        	}
         }
-        return isInstallShortcut ;
+        return state ;
 	}
 	
 	/**

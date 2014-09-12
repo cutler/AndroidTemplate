@@ -1,11 +1,16 @@
 package com.cutler.template.common.download;
 
+import java.io.File;
+import java.net.URL;
+
 import android.text.TextUtils;
 
+import com.cutler.template.MainApplication;
 import com.cutler.template.common.Config;
 import com.cutler.template.common.download.goal.DownloadObserver;
 import com.cutler.template.common.download.model.DownloadFile;
-import com.cutler.template.common.media.MediaManager;
+import com.cutler.template.common.download.model.Downloader;
+import com.cutler.template.util.StorageUtils;
 
 /**
  * 本类负责接收外界的下载请求。
@@ -14,9 +19,9 @@ public class DownloadManager {
 	private static DownloadManager instance;
 	// 下载器对象。
 	private Downloader mDownloader;
-
 	private DownloadManager() {
 		mDownloader = new Downloader();
+		service(Config.DownloadTypes.INIT_DOWNLOADER);
 	}
 
 	/**
@@ -36,6 +41,22 @@ public class DownloadManager {
 	}
 	
 	/**
+	 * 删除本地的缓存文件。
+	 * @param url
+	 */
+	public boolean deleteLocalFileByUrl(String url){
+		try {
+			URL localUrl = new URL(url);
+			String fileName = new File(localUrl.getFile()).getName();
+			File file = new File(StorageUtils.getDiskCacheDir(MainApplication.getInstance(), Config.CACHE_APK), fileName);
+			return file.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
 	 * 更新文件的状态。
 	 * @param type	操作的类型
 	 * @param file	操作的文件
@@ -52,22 +73,20 @@ public class DownloadManager {
 				mDownloader.addTask(file[0]);
 			}
 			break;
-//		case Config.DownloadTypes.CONTINUE:
-//			url = intent.getStringExtra(MyIntents.URL);
-//			if (!TextUtils.isEmpty(url)) {
-//				mDownloader.continueTask(url);
-//			}
-//			break;
+		case Config.DownloadTypes.PAUSE:
+			if (!TextUtils.isEmpty(file[0].getUrl())) {
+				mDownloader.pauseTask(file[0]);
+			}
+			break;
+		case Config.DownloadTypes.CONTINUE:
+			if (!TextUtils.isEmpty(file[0].getUrl())) {
+				mDownloader.continueTask(file[0]);
+			}
+			break;
 //		case Config.DownloadTypes.DELETE:
 //			url = intent.getStringExtra(MyIntents.URL);
 //			if (!TextUtils.isEmpty(url)) {
 //				mDownloader.deleteTask(url);
-//			}
-//			break;
-//		case Config.DownloadTypes.PAUSE:
-//			url = intent.getStringExtra(MyIntents.URL);
-//			if (!TextUtils.isEmpty(url)) {
-//				mDownloader.pauseTask(url);
 //			}
 //			break;
 //		case Config.DownloadTypes.STOP:
@@ -79,10 +98,10 @@ public class DownloadManager {
 //			break;
 		}
 	}
-
+	
 	public static DownloadManager getInstance() {
 		if (instance == null) {
-			synchronized (MediaManager.class) {
+			synchronized (DownloadManager.class) {
 				if (instance == null) {
 					instance = new DownloadManager();
 				}
@@ -90,4 +109,5 @@ public class DownloadManager {
 		}
 		return instance;
 	}
+
 }
