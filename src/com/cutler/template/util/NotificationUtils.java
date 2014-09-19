@@ -40,6 +40,7 @@ public class NotificationUtils {
     	notification.contentView.setProgressBar(R.id.pb, 100, 0, false);
     	notification.contentView.setTextViewText(R.id.down_tv, context.getString(R.string.download_doing, fileName, 0)); 
     	notification.flags|=Notification.FLAG_NO_CLEAR;
+    	notification.defaults |= Notification.DEFAULT_SOUND;
     	// 发送一个不可删除、点击没任何效果的通知到状态栏中。
     	mNotificationManager.notify(notifyId, notification);
     	// 返回给外界一个回调接口，当需要更新状态栏通知的进度时，就回调改接口中的方法。

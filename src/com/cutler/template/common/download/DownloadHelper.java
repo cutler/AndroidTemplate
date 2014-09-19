@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.cutler.template.MainApplication;
-import com.cutler.template.common.Config;
+import com.cutler.template.common.download.DownloadManager.DownloadTypes;
 import com.cutler.template.common.download.goal.DownloadObserver;
 import com.cutler.template.common.download.model.DownloadFile;
 import com.cutler.template.util.NotificationUtils;
@@ -42,11 +42,11 @@ public class DownloadHelper {
 				DownloadFile file = (DownloadFile) params.get(DownloadObserver.KEY_FILE);
 				if(file.getUrl().equals(file.getUrl())){
 					int type = (Integer) params.get(DownloadObserver.KEY_TYPE);
-					if (type == Config.DownloadTypes.ADD) {
+					if (type == DownloadTypes.ADD) {
 						callback = NotificationUtils.showDownloadNotify(context, downloadFile.getFileName(), notifyIds.get(downloadFile.getUrl()));
-					} else if(type == Config.DownloadTypes.PROGRESS) {
+					} else if(type == DownloadTypes.PROGRESS) {
 						callback.onProgessChanged((Integer) params.get(DownloadObserver.KEY_PROGRESS));
-					} else if(type == Config.DownloadTypes.COMPLETE) {
+					} else if(type == DownloadTypes.COMPLETE) {
 						NotificationUtils.cancelNotify(context, notifyIds.get(downloadFile.getUrl()));
 						notifyIds.remove(downloadFile.getUrl());
 						DownloadManager.getInstance().removeObserver(this);
@@ -59,13 +59,18 @@ public class DownloadHelper {
 							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 							MainApplication.getInstance().startActivity(intent);
 						}
+					} else if(type == DownloadTypes.ERROR) {
+						NotificationUtils.cancelNotify(context, notifyIds.get(downloadFile.getUrl()));
+						notifyIds.remove(downloadFile.getUrl());
+						DownloadManager.getInstance().removeObserver(this);
+						DownloadManager.getInstance().service(DownloadManager.DownloadTypes.DELETE, file);
 					}
 				}
 			}
 		};
 		DownloadManager.getInstance().addObserver(observer);
 		// 加入到下载队列中。
-		DownloadManager.getInstance().service(Config.DownloadTypes.ADD, downloadFile);
+		DownloadManager.getInstance().service(DownloadTypes.ADD, downloadFile);
 	}
 	
 	public static interface DownloadCallback {

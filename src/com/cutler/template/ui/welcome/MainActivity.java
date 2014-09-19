@@ -3,35 +3,29 @@ package com.cutler.template.ui.welcome;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 
-import com.cutler.template.MainApplication;
+import com.baidu.location.BDLocation;
 import com.cutler.template.R;
-import com.cutler.template.common.Config;
-import com.cutler.template.common.download.DownloadHelper;
-import com.cutler.template.common.download.DownloadManager;
-import com.cutler.template.common.download.model.DownloadFile;
+import com.cutler.template.common.location.LocationService;
 
 public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		final DownloadFile downloadFile = new DownloadFile();
-		downloadFile.setUseCache(false);
-		downloadFile.setFileName(getString(R.string.app_name));
-		downloadFile.setUrl("http://www.dev.suishenbb.com/download/suishenbb_android_1.5.1?c=Appchina");
-		DownloadHelper.downloadApkFileWithNotify(MainApplication.getInstance(), downloadFile, null);
-		
-		new Handler().postDelayed(new Runnable() {
+
+		// 开启定位服务。
+        LocationService.start();
+        new Handler().postDelayed(new Runnable() {
 			public void run() {
-				DownloadManager.getInstance().service(Config.DownloadTypes.PAUSE, downloadFile);
+				System.out.println("开始定222位 "+
+				LocationService.getLocation(new Handler(){
+		        	public void handleMessage(Message msg) {
+		        		System.out.println(((BDLocation)msg.obj).getAddrStr());
+		        	}
+		        }));;				
 			}
 		}, 3000);
-		new Handler().postDelayed(new Runnable() {
-			public void run() {
-				DownloadManager.getInstance().service(Config.DownloadTypes.CONTINUE, downloadFile);
-			}
-		}, 6000);
 	}
 }

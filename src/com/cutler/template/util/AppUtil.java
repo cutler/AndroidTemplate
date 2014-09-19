@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -118,11 +119,15 @@ public class AppUtil {
 	 * @return
 	 */
 	public static String getDeviceUniqueCode(Context ctx){
-		String uniqueCode = "35" + Build.BOARD.length()%10 + Build.BRAND.length()%10 + 
-				Build.CPU_ABI.length()%10 + Build.DEVICE.length()%10 + 
-				Build.DISPLAY.length()%10 + Build.HOST.length()%10 + Build.ID.length()%10 + 
-				Build.MANUFACTURER.length()%10 + Build.MODEL.length()%10 + Build.PRODUCT.length()%10 + 
-				Build.TAGS.length()%10 + Build.TYPE.length()%10 + Build.USER.length()%10 ; //13 digits  
+		TelephonyManager tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);    
+		String uniqueCode = tm.getDeviceId();
+		if(uniqueCode == null || uniqueCode.length() <= 10){
+			uniqueCode = "35" + Build.BOARD.length()%10 + Build.BRAND.length()%10 + 
+					Build.CPU_ABI.length()%10 + Build.DEVICE.length()%10 + 
+					Build.DISPLAY.length()%10 + Build.HOST.length()%10 + Build.ID.length()%10 + 
+					Build.MANUFACTURER.length()%10 + Build.MODEL.length()%10 + Build.PRODUCT.length()%10 + 
+					Build.TAGS.length()%10 + Build.TYPE.length()%10 + Build.USER.length()%10 ; //13 digits  
+		}
 		return uniqueCode;
 	}
 	
@@ -150,6 +155,22 @@ public class AppUtil {
 		PackageManager packageManager = context.getPackageManager();
 		Intent intent = packageManager.getLaunchIntentForPackage(packageName);
 		context.startActivity(intent);
+	}
+	
+	/**
+	 * 获取当前进程的名字。
+	 * @param context
+	 * @return
+	 */
+	public static String getCurProcessName(Context context) {
+		int pid = android.os.Process.myPid();
+		ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		for (android.app.ActivityManager.RunningAppProcessInfo appProcess : mActivityManager.getRunningAppProcesses()) {
+			if (appProcess.pid == pid) {
+				return appProcess.processName;
+			}
+		}
+		return null;
 	}
 
     public static void kill(Context context, String packageName) {

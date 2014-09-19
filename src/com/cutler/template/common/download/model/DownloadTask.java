@@ -130,6 +130,10 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
     	return file.getAbsolutePath();
     }
 
+    public String getDownloadFileLocalTempPath(){
+    	return tempFile.getAbsolutePath();
+    }
+    
     @Override
     protected void onPreExecute() {
         previousTime = System.currentTimeMillis();

@@ -12,6 +12,11 @@ public interface DownloadObserver {
 	public static String KEY_SPEED = "speed";
 	
 	/**
+	 * 总大小
+	 */
+	public static String KEY_TOTAL_SIZE = "totalSize";
+	
+	/**
 	 * 下载进度
 	 */
 	public static String KEY_PROGRESS = "progress";

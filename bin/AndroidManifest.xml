@@ -7,11 +7,14 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="15" />
     
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    
+    <!-- 检测Wifi -->
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />  
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 手机IMEI -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!-- 快捷方式 -->
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />  
 	<uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
@@ -19,6 +22,18 @@
 	<uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
 	<uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
 
+	<!-- 以下为百度定位需要用到的权限-->
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+	<uses-permission android:name="android.permission.READ_LOGS"/>
+	
     <application
         android:name=".MainApplication"
         android:icon="@drawable/ic_launcher"
@@ -32,6 +47,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- 百度定位sdk -->
+        <service android:name="com.baidu.location.f" android:enabled="true" android:process=":remote"/>
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="2dfjxbUBVWpTvHKP4A9YviAG" />
+
     </application>
 
 </manifest>

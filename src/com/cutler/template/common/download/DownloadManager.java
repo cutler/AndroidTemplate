@@ -21,7 +21,7 @@ public class DownloadManager {
 	private Downloader mDownloader;
 	private DownloadManager() {
 		mDownloader = new Downloader();
-		service(Config.DownloadTypes.INIT_DOWNLOADER);
+		service(DownloadTypes.INIT_DOWNLOADER);
 	}
 
 	/**
@@ -63,40 +63,83 @@ public class DownloadManager {
 	 */
 	public void service(int type, DownloadFile...file) {
 		switch (type) {
-		case Config.DownloadTypes.INIT_DOWNLOADER:
+		case DownloadTypes.INIT_DOWNLOADER:
 			if (!mDownloader.isRunning()) {
 				mDownloader.startManage();
 			}
 			break;
-		case Config.DownloadTypes.ADD:
+		case DownloadTypes.ADD:
 			if (!TextUtils.isEmpty(file[0].getUrl()) && !mDownloader.hasTask(file[0])) {
 				mDownloader.addTask(file[0]);
 			}
 			break;
-		case Config.DownloadTypes.PAUSE:
+		case DownloadTypes.PAUSE:
 			if (!TextUtils.isEmpty(file[0].getUrl())) {
 				mDownloader.pauseTask(file[0]);
 			}
 			break;
-		case Config.DownloadTypes.CONTINUE:
+		case DownloadTypes.CONTINUE:
 			if (!TextUtils.isEmpty(file[0].getUrl())) {
 				mDownloader.continueTask(file[0]);
 			}
 			break;
-//		case Config.DownloadTypes.DELETE:
-//			url = intent.getStringExtra(MyIntents.URL);
-//			if (!TextUtils.isEmpty(url)) {
-//				mDownloader.deleteTask(url);
-//			}
-//			break;
+		case DownloadTypes.DELETE:
+			if (!TextUtils.isEmpty(file[0].getUrl())) {
+				mDownloader.deleteTask(file[0], file[0].isDeleteCache());
+			}
+			break;
 //		case Config.DownloadTypes.STOP:
 //			mDownloader.close();
 //			// mDownloadManager = null;
 //			break;
-//
-//		default:
-//			break;
 		}
+	}
+	
+	/**
+	 * 下载模块相关的常量
+	 */
+	public class DownloadTypes{
+		/**
+		 *  初始化下载器
+		 */
+		public static final int INIT_DOWNLOADER = 0;
+		
+		/**
+		 * 下载进度改变
+		 */
+		public static final int PROGRESS = 1;
+		
+		/**
+		 * 添加一个新的下载任务
+		 */
+		public static final int ADD = 6;
+		
+		/**
+		 * 暂停下载
+		 */
+		public static final int PAUSE = 3;
+		
+		/**
+		 * 继续下载
+		 */
+		public static final int CONTINUE = 5;
+		
+		/**
+		 * 下载完成
+		 */
+		public static final int COMPLETE = 2;
+		
+		/**
+		 * 删除下载
+		 */
+		public static final int DELETE = 4;
+		
+		public static final int STOP = 7; 
+		
+		/**
+		 * 下载出错
+		 */
+		public static final int ERROR = 9;
 	}
 	
 	public static DownloadManager getInstance() {

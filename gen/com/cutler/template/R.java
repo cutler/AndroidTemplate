@@ -9,6 +9,22 @@ package com.cutler.template;
 
 public final class R {
     public static final class attr {
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int gif=0x7f010000;
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int gifMoviewViewStyle=0x7f010002;
+        /** <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int paused=0x7f010001;
     }
     public static final class drawable {
         public static final int ic_action_download=0x7f020000;
@@ -42,6 +58,85 @@ public final class R {
         public static final int title_activity_main=0x7f040003;
     }
     public static final class style {
-        public static final int AppTheme=0x7f050000;
+        /** 
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    
+
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        
+         */
+        public static final int AppBaseTheme=0x7f050000;
+        /**  Application theme. 
+ All customizations that are NOT specific to a particular API-level can go here. 
+         */
+        public static final int AppTheme=0x7f050001;
+        public static final int Widget_GifMoviewView=0x7f050002;
     }
+    public static final class styleable {
+        /** Attributes that can be used with a CustomTheme.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #CustomTheme_gifMoviewViewStyle com.cutler.template:gifMoviewViewStyle}</code></td><td></td></tr>
+           </table>
+           @see #CustomTheme_gifMoviewViewStyle
+         */
+        public static final int[] CustomTheme = {
+            0x7f010002
+        };
+        /**
+          <p>This symbol is the offset where the {@link com.cutler.template.R.attr#gifMoviewViewStyle}
+          attribute's value can be found in the {@link #CustomTheme} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name android:gifMoviewViewStyle
+        */
+        public static final int CustomTheme_gifMoviewViewStyle = 0;
+        /** Attributes that can be used with a GifMoviewView.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #GifMoviewView_gif com.cutler.template:gif}</code></td><td></td></tr>
+           <tr><td><code>{@link #GifMoviewView_paused com.cutler.template:paused}</code></td><td></td></tr>
+           </table>
+           @see #GifMoviewView_gif
+           @see #GifMoviewView_paused
+         */
+        public static final int[] GifMoviewView = {
+            0x7f010000, 0x7f010001
+        };
+        /**
+          <p>This symbol is the offset where the {@link com.cutler.template.R.attr#gif}
+          attribute's value can be found in the {@link #GifMoviewView} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name android:gif
+        */
+        public static final int GifMoviewView_gif = 0;
+        /**
+          <p>This symbol is the offset where the {@link com.cutler.template.R.attr#paused}
+          attribute's value can be found in the {@link #GifMoviewView} array.
+
+
+          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:paused
+        */
+        public static final int GifMoviewView_paused = 1;
+    };
 }

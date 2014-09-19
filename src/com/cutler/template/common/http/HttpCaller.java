@@ -14,24 +14,37 @@ import org.json.JSONObject;
 
 import com.cutler.template.util.IOUtil;
 
-
-
 /**
  * 本类用来发送post和get请求。
+ * 使用 HttpCaller.getInstance().service(params)来调用接口。 其中必须要提供的参数有：
+ * -  KEY_URL、KEY_METHOD、KEY_CALLBACK、KEY_PARAMS
  */
 public class HttpCaller {
 	public static String base_url = "http://addp.zlimits.com/addp/admin/service/";
 	private static HttpCaller instance;
 	/** post请求方式 */
-	public static final String REQUEST_POST_METHOD = "POST";
+	public static final String METHOD_POST = "POST";
+	/** post请求方式  并要求请求参数以json的形式发送给服务端*/
+	public static final String METHOD_POST_JSON = "POST_JSON";
 	/** get请求方式 */
-	public static final String REQUEST_GET_METHOD = "GET";
+	public static final String METHOD_GET = "GET";
+	/** get请求方式  并要求返回byte[]类型的数据 */
+	public static final String METHOD_GET_BYTE = "GET_BYTE";
 	/** 请求参数的编码 */
 	public static final String ENCODE_CHARSETNAME = "UTF-8";
     /** 连接超时时间  **/
 	public static final int REQUEST_CONNECT_TIMEOUT = 10 * 1000;
     /** 读取数据超时时间**/
 	public static final int REQUEST_READ_TIMEOUT = 15 * 1000;
+	
+	/** 请求的url **/
+	public static final String KEY_URL = "url";
+	/** 请求的方式 **/
+	public static final String KEY_METHOD = "method";
+	/** 请求完成后的回调 **/
+	public static final String KEY_CALLBACK = "callback";
+	/** 请求时需要传递给服务器端的参数 **/
+	public static final String KEY_PARAMS = "params";
 	
 	private HttpCaller(){
 		
@@ -45,16 +58,25 @@ public class HttpCaller {
 	}
 	
 	/**
+	 * 在子线程中发送http请求，当请求结束后通过回调方法通知前端代码。
+	 * @param params
+	 */
+	public void service(Map<String, Object> params) {
+		HttpTask httpTask = new HttpTask(params);
+		httpTask.execute();
+	}
+	
+	/**
 	 * 发送get请求。 
 	 * @return 若连接超时或发生其他错误，则返回null。 
 	 */
-	public String doGet(String url, Map<String, String> params) {
+	public String doGet(Map<String, Object> params) {
 		HttpURLConnection conn = null;
 		String json = null;
 		try {
-			url = appendParamsToUrl(url, params);
-			conn = prepareConnection(url, REQUEST_GET_METHOD);
-			json = executeRequest(conn, json);
+			String url = appendParamsToUrl(params);
+			conn = prepareConnection(url, METHOD_GET);
+			json = (String) executeRequest(conn, true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -64,17 +86,17 @@ public class HttpCaller {
 		}
 		return json;
 	}
-
+	
 	/**
 	 * 发送Post请求。
 	 * @return 若连接超时或发生其他错误，则返回null。 
 	 */
-	public String doPost(String url, Map<String, String> params) {
+	public String doPost(Map<String, Object> params) {
 		HttpURLConnection conn = null;
 		String json = null;
 		try {
-			conn = prepareConnectionForPost(url, REQUEST_POST_METHOD, params, false);
-			json = executeRequest(conn, json);
+			conn = prepareConnectionForPost(params);
+			json = (String) executeRequest(conn, true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -85,16 +107,40 @@ public class HttpCaller {
 		return json;
 	}
 	
+	
+	/**
+	 * 发送get请求，并将InputStream中的数据转为byte[]类型的数据返回。
+	 * @param url
+	 * @param params
+	 * @return
+	 */
+	public byte[] doGetForByteArray(Map<String, Object> params) {
+		HttpURLConnection conn = null;
+		byte[] array = null;
+		try {
+			String url = appendParamsToUrl(params);
+			conn = prepareConnection(url, METHOD_GET);
+			array = (byte[]) executeRequest(conn, false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null) {
+				conn.disconnect();
+			}
+		}
+		return array;
+	}
+
 	/**
 	 *  数据以json格式发送Post请求。
 	 * @return 若连接超时或发生其他错误，则返回null。 
 	 */
-	public String doPost(String url, Map<String, String> params, boolean isJson) {
+	public String doPostForJSON(Map<String, Object> params) {
 		HttpURLConnection conn = null;
 		String json = null;
 		try {
-			conn = prepareConnectionForPost(url, REQUEST_POST_METHOD, params, isJson);
-			json = executeRequest(conn, json);
+			conn = prepareConnectionForPost(params);
+			json = (String) executeRequest(conn, true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -103,21 +149,6 @@ public class HttpCaller {
 			}
 		}
 		return json;
-	}
-	
-	/**
-	 * 发送http请求，当请求结束后通过回调方法通知前端代码。
-	 * @param url	接口的地址
-	 * @param name	接口名称
-	 * @param method	请求方法(get、post)
-	 * @param params	请求参数
-	 * @param handler	回调接口
-	 * @param isJsonForRequst	是否以JSON格式发送请求参数
-	 */
-	public void service(String url, String name, String method, Map<String, String> params, 
-			IHttpHandler handler, boolean isJsonForRequst){
-		HttpTask httpTask = new HttpTask(url, name, method, handler, isJsonForRequst);
-		httpTask.execute(params);
 	}
 	
 	/**
@@ -126,10 +157,10 @@ public class HttpCaller {
 	 * @param params
 	 * @return
 	 */
-	public String appendParamsToUrl(String url,Map<String, String> params)throws Exception {
-		StringBuilder sub = new StringBuilder(url);
+	public String appendParamsToUrl(Map<String, Object> params)throws Exception {
+		StringBuilder sub = new StringBuilder((String) params.get(HttpCaller.KEY_URL));
 		sub.append("?");
-		sub.append(encodingRequestParams(params, ENCODE_CHARSETNAME, false));
+		sub.append(encodingRequestParams((Map<String, String>) params.get(KEY_PARAMS), ENCODE_CHARSETNAME, false));
 		return sub.toString();
 	}
 	
@@ -159,29 +190,25 @@ public class HttpCaller {
 	
 	/**
 	 * 向服务器端发送请求，并依据响应码来决定处理的方式。
-	 * @param conn
-	 * @param json
-	 * @return
-	 * @throws IOException
-	 * @throws Exception
 	 */
-	private String executeRequest(HttpURLConnection conn, String json)throws IOException, Exception {
+	private Object executeRequest(HttpURLConnection conn, boolean parseToString)throws IOException, Exception {
+		Object result;
 		int code = conn.getResponseCode();
 		switch(code){
 		case 200:	// 200 和 400 时解析服务器返回的json。
-			json = inputStream2String(conn, conn.getInputStream());
+			result = inputStream2String(conn, conn.getInputStream(), parseToString);
 			break;
 		case 400:
-			json = inputStream2String(conn, conn.getErrorStream());
+			result = inputStream2String(conn, conn.getErrorStream(), parseToString);
 			break;
 		case 404:
-			json = createJson(code);
+			result = createJson(code);
 			break;
 		default:	// 其他状态码，如5xx等，统一按照500处理。
-			json = createJson(500);
+			result = createJson(500);
 			break;
 		}
-		return json;
+		return result;
 	}
 
 	/**
@@ -199,33 +226,33 @@ public class HttpCaller {
 	}
 
 	/**
-	 * 将InputStream中的数据以字符串的形式返回。 并保存服务器返回的cookie。
+	 * 将InputStream中的数据以字符串或字节数据的形式返回。 并保存服务器返回的cookie。
 	 * @param input
 	 * @return
 	 */
-	public String inputStream2String(HttpURLConnection conn ,InputStream input)throws Exception{
+	public Object inputStream2String(HttpURLConnection conn ,InputStream input, boolean parseToString)throws Exception{
 		// 保存本次获取到的cookie。 和服务器端已约定好了，只有注册、登录接口会返回cookie。
 		String cookie = conn.getHeaderField("set-cookie");
 		if (cookie != null && cookie.trim().length() > 0) {
-			// 保存cookie。
+			// 保存cookie。TODO
 		}
 		if ("gzip".equals(conn.getContentEncoding())) {
             input = new GZIPInputStream(input);
         }
-		return IOUtil.inputStream2String(input, ENCODE_CHARSETNAME);
+		return parseToString ? IOUtil.inputStream2String(input, ENCODE_CHARSETNAME)
+				: IOUtil.inputStream2ByteArray(input);
 	}
 
 	/**
 	 * 初始化HttpURLConnection对象。
 	 */
-	public HttpURLConnection prepareConnection(String url,String method)throws Exception{
+	public HttpURLConnection prepareConnection(String url, String method)throws Exception{
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 		conn.setConnectTimeout(REQUEST_CONNECT_TIMEOUT);
 		conn.setReadTimeout(REQUEST_READ_TIMEOUT);
 		conn.setRequestMethod(method);
-		// 请求之前，设置cookie。
-		// StringBuilder cookie = new StringBuilder();
-		// conn.setRequestProperty("Cookie", cookie.toString());
+		// 请求之前，设置cookie。 TODO
+		// conn.setRequestProperty("Cookie", cookie);
 		conn.setRequestProperty("Accept-Encoding", "gzip");
 		return conn;
 	}
@@ -233,16 +260,17 @@ public class HttpCaller {
 	/**
 	 * 为Post请求初始化HttpURLConnection对象。
 	 */
-	public HttpURLConnection prepareConnectionForPost(String url,String method,Map<String,String> params,boolean isJson)throws Exception{
-		HttpURLConnection conn = prepareConnection(url, method);
+	public HttpURLConnection prepareConnectionForPost(Map<String, Object> params)throws Exception{
+		HttpURLConnection conn = prepareConnection((String) params.get(HttpCaller.KEY_URL), METHOD_POST);
 		conn.setDoOutput(true);
 		OutputStream output = null;
 		try {
+			boolean isJson = METHOD_POST_JSON.equals(params.get(HttpCaller.KEY_METHOD));
 			if (isJson) {
 				conn.setRequestProperty("Content-Type","text/json; charset=UTF-8");
 			}
 			output = conn.getOutputStream();
-			output.write(encodingRequestParams(params, ENCODE_CHARSETNAME,isJson).getBytes());
+			output.write(encodingRequestParams((Map<String, String>) params.get(KEY_PARAMS), ENCODE_CHARSETNAME, isJson).getBytes());
 		} finally {
 			if (output != null) {
 				output.close();
