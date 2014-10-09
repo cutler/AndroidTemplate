@@ -172,6 +172,33 @@ public class AppUtil {
 		}
 		return null;
 	}
+	
+	/**
+	 * 关闭指定的进程。
+	 * @param context
+	 * @param packageName
+	 */
+	public static void killProcesse(Context context, String packageName){
+		ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningAppProcessInfo> runningAppProcessInfos = am.getRunningAppProcesses();
+		if (runningAppProcessInfos == null
+				|| runningAppProcessInfos.size() == 0)
+			return;
+		/*
+		 * for (RunningTaskInfo info : runningTaskInfos) { if
+		 * (!info.baseActivity.getPackageName().equals(getPackageName())) {
+		 * Log.d(TAG, "Will kill " + info.baseActivity.getPackageName());
+		 * am.killBackgroundProcesses(info.baseActivity.getPackageName()); }
+		 * }
+		 */
+		for (RunningAppProcessInfo info : runningAppProcessInfos) {
+			if (/* info.pid != android.os.Process.myPid() */info.processName.equals(packageName)) {
+				System.out.println("关闭进程："+packageName);//TODO
+				android.os.Process.killProcess(info.pid);
+				am.killBackgroundProcesses(info.processName);
+			}
+		}
+	}
 
     public static void kill(Context context, String packageName) {
         List<RunningAppProcessInfo> runningProcesses;

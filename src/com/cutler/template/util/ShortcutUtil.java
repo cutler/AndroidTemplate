@@ -3,6 +3,7 @@ package com.cutler.template.util;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -120,8 +121,9 @@ public class ShortcutUtil {
         Cursor cursor = context.getContentResolver().query(CONTENT_URI,
                 new String[]{ "title","intent"}, "title=?",
                 new String[]{context.getString(textResId)}, null);
+        String intent = "intent";
         while (cursor != null && cursor.moveToNext()) {
-        	String intent = new String(cursor.getString(cursor.getColumnIndex("intent")));
+        	intent = new String(cursor.getString(cursor.getColumnIndex("intent")));
         	if(intent.indexOf(context.getPackageName()) >= 0){
         		state = STATE_EXIST_AND_IS_SELF;
         		break;
@@ -129,6 +131,15 @@ public class ShortcutUtil {
         		state = STATE_EXIST_AND_IS_OTHER;
         	}
         }
+        if (cursor != null) {
+			cursor.close();
+		}
+        // 如果快捷方式已经存在，则修改它的名称为默认名称，以防止别人修改。TODO 有些机型出bug
+ 		if (state == STATE_EXIST_AND_IS_SELF) {
+ 			ContentValues values = new ContentValues();
+ 			values.put("title", context.getString(textResId));
+ 			context.getContentResolver().update(CONTENT_URI, values, "intent=?", new String[]{intent});
+ 		}
         return state ;
 	}
 	
@@ -137,14 +148,21 @@ public class ShortcutUtil {
 	 * @param context
 	 * @param textResId
 	 */
-	public static void delShortcut(Context context, Class<? extends Activity> clazz, int textResId){ 
+	public static void delShortcut(Context context, Class<? extends Activity> clazz, int textResId){
+		// 第一种方式：通过标准的方式，发送广播删除。
 		Intent shortcut = new Intent("com.android.launcher.action.UNINSTALL_SHORTCUT");  
         shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, context.getString(textResId));  
         Intent intent = new Intent(context, clazz);  
         intent.setAction("android.intent.action.MAIN");  
         intent.addCategory("android.intent.category.LAUNCHER");  
         shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT,intent);  
-        context.sendBroadcast(shortcut);  
+        context.sendBroadcast(shortcut);
+        // 第二种方式：通过操作数据库来删除。	如果以后android的数据库字段改名了，则就得修改下面的代码，目前是可以使用的。
+        // 把所有非当前应用程序创建的同名快捷方式都他妈的给我删除了。操！
+// 		String AUTHORITY = getAuthorityFromPermission(context, "com.android.launcher.permission.READ_SETTINGS");
+// 	    Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/favorites?notify=true");
+// 	    context.getContentResolver().delete(CONTENT_URI, "title=? and intent not like ? ", new String[]{text,
+// 	    		 "%"+context.getPackageName()+"%"});
     }    
 	
 	/*

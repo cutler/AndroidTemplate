@@ -20,7 +20,7 @@
  -	util  ：	存放与当前项目无关的工具类，即这些类可以轻松的拿到其他项目中直接使用。
  	- 要始终保持本包下的类不会“依赖”到项目中的任何类。
  
- -	controller:  不是每个模块都需要用到controller的，如果activity中的业务在其被关闭后仍然需要继续，则就需要用到controller了，比如下载模块。通常controller是单例的。
+ -	controller:  不是每个模块都需要用到controller的，如果activity中的业务在其被关闭后仍然需要继续，则就需要用到controller了，比如下载模块。通常controller是单例的。  即前端代码写在activity或者controller中。
  
  整体的分包思路：
  - 如果项目是这样的一个由行和列组成的表结构：

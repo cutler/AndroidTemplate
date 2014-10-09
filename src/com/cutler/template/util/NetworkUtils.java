@@ -10,12 +10,15 @@ public class NetworkUtils {
 	
 	/**
 	 * make true current connect service is wifi
+	 * 
 	 * @param mContext
 	 * @return
 	 */
 	public static boolean isWifi() {
-		ConnectivityManager connectivityManager = (ConnectivityManager) MainApplication.getInstance()
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		ConnectivityManager connectivityManager = (ConnectivityManager) MainApplication.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (connectivityManager == null) {
+			return false;
+		}
 		NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
 		if (activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI) {
 			return true;

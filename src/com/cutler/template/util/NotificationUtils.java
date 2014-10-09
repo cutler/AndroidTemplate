@@ -1,8 +1,15 @@
 package com.cutler.template.util;
 
+import java.util.Map;
+
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.cutler.template.R;
@@ -11,6 +18,16 @@ import com.cutler.template.R;
  * 描述：显示通知的工具类
  *
  * @author jianxiong.yj
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * 应该考虑PendingIntent.getBroadcast(context, 0, new Intent(), 0); 的情况，不然不圆满。
+ *
+ *
  *
  */
 public class NotificationUtils {
@@ -25,6 +42,46 @@ public class NotificationUtils {
 		mNotificationManager.cancel(notifyId);
 	}
 
+	/**
+	 *
+	 * 描述：显示可以自动取消的通知
+	 * @param context 上下文
+	 * @param tickertText  图标边显示的文字，短暂的显示后消失
+	 * @param title  通知的标题
+	 * @param content 通知的内容
+	 * @param notifyId 通知的id
+	 * @param clazz 点击通知后要转会的Activity
+	 * @param flag 用来控制，当点击通知栏后，跳转到目标界面上时，目标界面所要接收的参数。  
+	 */
+	public static void showAutoCancelNotify(Context context, Map<String, Object> params) {
+		String tickertText = (String) params.get("tickertText");
+		String title = (String) params.get("title");
+		String content = (String) params.get("content");
+		Integer notifyId = (Integer) params.get("notifyId");
+		Intent intent = (Intent) params.get("intent");
+		Integer iconResId = (Integer) params.get("iconResId");
+		if (iconResId == null) {
+			iconResId = R.drawable.ic_common_transparent;
+		}
+		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		// 创建通知。
+		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);  
+		mBuilder.setContentTitle(title)	//设置通知栏标题
+		.setSmallIcon(iconResId)
+		.setContentText(content)
+		.setTicker(tickertText) 		//通知首次出现在通知栏，带上升动画效果的
+		.setWhen(System.currentTimeMillis())//通知产生的时间，会在通知信息里显示，一般是系统获取到的时间
+		.setAutoCancel(true)			//设置这个标志当用户单击面板就可以让通知将自动取消  
+		.setContentIntent(pendingIntent);
+		Bitmap iconBitmap = (Bitmap) params.get("iconBitmap");
+		if (iconBitmap != null) {
+			mBuilder.setLargeIcon(iconBitmap);
+		}
+		// 发出通知。
+		mNotificationManager.notify(notifyId, mBuilder.build());
+	}
+	
 	/**
 	 * 显示一个进度条通知。
 	 * @param context
