@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.DisplayMetrics;
 import android.widget.RemoteViews;
 
 import com.cutler.template.R;
@@ -78,6 +79,19 @@ public class NotificationUtils {
 		if (iconBitmap != null) {
 			mBuilder.setLargeIcon(iconBitmap);
 		}
+		// 多行文本风格
+		NotificationCompat.InboxStyle  inboxStyle = new NotificationCompat.InboxStyle();  
+        inboxStyle.setBigContentTitle(title);
+        inboxStyle.setSummaryText(content);
+        DisplayMetrics m = context.getResources().getDisplayMetrics();  
+        int end = 0;
+        int step = m.widthPixels/40;
+		for (int i = 0; i < content.length(); i+=step) {
+			end = i+step;
+			end = end > content.length()? content.length():end;
+			inboxStyle.addLine(content.substring(i, end));
+		}
+        mBuilder.setStyle(inboxStyle);
 		// 发出通知。
 		mNotificationManager.notify(notifyId, mBuilder.build());
 	}
@@ -97,7 +111,6 @@ public class NotificationUtils {
     	notification.contentView.setProgressBar(R.id.pb, 100, 0, false);
     	notification.contentView.setTextViewText(R.id.down_tv, context.getString(R.string.download_doing, fileName, 0)); 
     	notification.flags|=Notification.FLAG_NO_CLEAR;
-    	notification.defaults |= Notification.DEFAULT_SOUND;
     	// 发送一个不可删除、点击没任何效果的通知到状态栏中。
     	mNotificationManager.notify(notifyId, notification);
     	// 返回给外界一个回调接口，当需要更新状态栏通知的进度时，就回调改接口中的方法。

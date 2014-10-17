@@ -2,6 +2,7 @@ package com.cutler.template.common.download.model;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import com.cutler.template.MainApplication;
 import com.cutler.template.common.Config;
+import com.cutler.template.common.download.DownloadManager.DownloadStates;
 import com.cutler.template.common.download.DownloadManager.DownloadTypes;
 import com.cutler.template.common.download.goal.DownloadObserver;
 import com.cutler.template.common.download.goal.DownloadTaskListener;
@@ -60,15 +62,17 @@ public class Downloader extends Thread {
 	 * 从本地数据库中加载上次未完成的下载任务。
 	 */
 	private void loadUncompleteTasks() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
     public void run() {
         while (isRunning) {
             DownloadTask task = mWatingTaskQueue.poll();
-            mDownloadingTaskList.add(task);
-            task.execute();
+			if (task != null) {
+				mDownloadingTaskList.add(task);
+				task.execute();
+			}
         }
     }
 	
@@ -86,15 +90,13 @@ public class Downloader extends Thread {
 	 * @return
 	 */
 	public boolean hasTask(DownloadFile file) {
-        DownloadTask task;
-        for (int i = 0; i < mDownloadingTaskList.size(); i++) {
-            task = mDownloadingTaskList.get(i);
-            if (task.getDownloadFile().getUrl().equals(file.getUrl())) {
+        for (DownloadTask task : mDownloadingTaskList) {
+        	if (task.getDownloadFile().getUrl().equals(file.getUrl())) {
                 return true;
             }
         }
         for (int i = 0; i < mPausingTaskList.size(); i++) {
-            task = mPausingTaskList.get(i);
+        	DownloadTask task = mPausingTaskList.get(i);
             if (task.getDownloadFile().getUrl().equals(file.getUrl())) {
                 return true;
             }
@@ -123,6 +125,14 @@ public class Downloader extends Thread {
     }
 	
 	/**
+	 * 返回当前下载队列中任务的总个数。
+	 * @return
+	 */
+	public int getTotalTaskCount() {
+        return getQueueTaskCount() + getDownloadingTaskCount() + getPausingTaskCount();
+    }
+	
+	/**
      * Create a new download task with default config
      * 
      * @param url
@@ -131,13 +141,12 @@ public class Downloader extends Thread {
      */
     private DownloadTask newDownloadTask(DownloadFile file) throws MalformedURLException {
         DownloadTaskListener taskListener = new DownloadTaskListener() {
-            @Override
-            public void updateProgress(DownloadTask task) {
+            public void onProgressChanged(DownloadTask task) {
             	// 通知所有观察者，数据已经改变。
             	Map<String,Object> params = new HashMap<String,Object>();
-        		params.put(DownloadObserver.KEY_TYPE, DownloadTypes.PROGRESS);
-//        		params.put(DownloadObserver.KEY_SPEED, task.getDownloadSpeed() + "kbps | "
-//                        + task.getDownloadSize() + " / " + task.getTotalSize());
+        		params.put(DownloadObserver.KEY_TYPE, DownloadStates.PROGRESS);
+        		// params.put(DownloadObserver.KEY_SPEED, task.getDownloadSpeed() + "kbps | "
+                //        + task.getDownloadSize() + " / " + task.getTotalSize());
         		params.put(DownloadObserver.KEY_TOTAL_SIZE, task.getTotalSize());
         		params.put(DownloadObserver.KEY_PROGRESS, task.getDownloadPercent());
         		params.put(DownloadObserver.KEY_FILE, task.getDownloadFile());
@@ -145,28 +154,31 @@ public class Downloader extends Thread {
             }
 
             @Override
-            public void preDownload(DownloadTask task) {
+            public void onPreExecute(DownloadTask task) {
             	// 下载之前先将文件保存到本地数据库中。
-                // ConfigUtils.storeURL(mContext, mDownloadingTasks.indexOf(task), task.getUrl()); TODO
             }
 
             @Override
-            public void finishDownload(DownloadTask task) {
+            public void onFinished(DownloadTask task) {
                 completeTask(task);
             }
 
             @Override
-            public void errorDownload(DownloadTask task, Throwable error) {
-            	if (error != null) {
-                	// 通知所有观察者，数据已经改变。
-                	Map<String,Object> params = new HashMap<String,Object>();
-            		params.put(DownloadObserver.KEY_TYPE, DownloadTypes.ERROR);
-            		params.put(DownloadObserver.KEY_FILE, task.getDownloadFile());
-                	notifyObservers(params);
-                    Toast.makeText(MainApplication.getInstance(), "Error: \n" + error.getMessage(), Toast.LENGTH_LONG)
-                            .show();
-                }
+            public void onError(DownloadTask task, Throwable error) {
+            	System.out.println("onError  "+mWatingTaskQueue.size()+","+task.getDownloadFile().getFileName());//TODO
+            	onErrorTask(task, error);
             }
+
+			@Override
+			public void onCanceled(DownloadTask task) {
+				onCanceledTask(task);
+			}
+			
+			@Override
+			public void onPaused(DownloadTask task) {
+				onPausedTask(task);
+			}
+
         };
         return new DownloadTask(file, StorageUtils.getDiskCacheDir(MainApplication.getInstance(), Config.CACHE_APK).getAbsolutePath(), taskListener);
     }
@@ -178,6 +190,7 @@ public class Downloader extends Thread {
     private void addTask(DownloadTask task) {
         notifyAddTask(task.getDownloadFile());
         mWatingTaskQueue.offer(task);
+        // 如果没有启动下载器，则此时启动。
         if (!this.isAlive()) {
             this.startManage();
         }
@@ -217,7 +230,7 @@ public class Downloader extends Thread {
 	}
 	
     /**
-     * 通知所有观察者数据已经改变。 
+     * 在主线程中，通知所有观察者数据已经改变。 
      */
     public void notifyObservers(final Map<String,Object> params){
     	if(observers != null){
@@ -236,38 +249,24 @@ public class Downloader extends Thread {
     }
     
     /**
-     * 文件下载完成。
-     * @param task
-     */
-    public synchronized void completeTask(DownloadTask task) {
-        if (mDownloadingTaskList.contains(task)) {
-        	mDownloadingTaskList.remove(task);
-        	// 通知所有观察者，数据已经改变。
-        	Map<String,Object> params = new HashMap<String,Object>();
-    		params.put(DownloadObserver.KEY_TYPE, DownloadTypes.COMPLETE);
-    		params.put(DownloadObserver.KEY_FILE, task.getDownloadFile());
-    		params.put(DownloadObserver.KEY_LOCAL_PATH, task.getDownloadFileLocalPath());
-        	notifyObservers(params);
-        }
-    }
-    
-    /**
      * 暂停下载。
      * @param downloadFile
      */
     public synchronized void pauseTask(DownloadFile downloadFile) {
-    	DownloadTask task;
-        for (int i = 0; i < mDownloadingTaskList.size(); i++) {
-            task = mDownloadingTaskList.get(i);
-            if (task != null && task.getDownloadFile().getUrl().equals(downloadFile.getUrl())) {
+    	for (DownloadTask task : mDownloadingTaskList) {
+    		if (task != null && task.getDownloadFile().getUrl().equals(downloadFile.getUrl())) {
                 pauseTask(task);
             }
-        }
+		}
 	}
     
+    /**
+     * 暂停下载。
+     * @param task
+     */
     private synchronized void pauseTask(DownloadTask task) {
         if (task != null) {
-            task.onCancelled();
+            task.pause();
             // move to pausing list
             try {
             	mDownloadingTaskList.remove(task);
@@ -284,15 +283,17 @@ public class Downloader extends Thread {
      * @param url
      */
     public synchronized void continueTask(DownloadFile downloadFile) {
-        DownloadTask task;
-        for (int i = 0; i < mPausingTaskList.size(); i++) {
-            task = mPausingTaskList.get(i);
-            if (task != null && task.getDownloadFile().getUrl().equals(downloadFile.getUrl())) {
+    	for (DownloadTask task : mPausingTaskList) {
+    		if (task != null && task.getDownloadFile().getUrl().equals(downloadFile.getUrl())) {
                 continueTask(task);
             }
-        }
+    	}
     }
     
+    /**
+     * 继续下载。
+     * @param task
+     */
     private synchronized void continueTask(DownloadTask task) {
         if (task != null) {
         	mPausingTaskList.remove(task);
@@ -305,43 +306,136 @@ public class Downloader extends Thread {
      * @param url
      */
     public synchronized void deleteTask(DownloadFile downloadFile, boolean deleteCache) {
-        DownloadTask task;
         String url = downloadFile.getUrl();
-        for (int i = 0; i < mDownloadingTaskList.size(); i++) {
-            task = mDownloadingTaskList.get(i);
-            if (task != null && task.getDownloadFile().getUrl().equals(url)) {
+        for (DownloadTask task : mDownloadingTaskList) {
+        	if (task != null && task.getDownloadFile().getUrl().equals(url)) {
 				if (deleteCache) {
 					File file = new File(task.getDownloadFileLocalPath());
 					file.delete();
 					file = new File(task.getDownloadFileLocalTempPath());
 					file.delete();
 				}
-                task.onCancelled();
-                completeTask(task);
+                task.stop();
+                onCanceledTask(task);
                 return;
             }
         }
         for (int i = 0; i < mWatingTaskQueue.size(); i++) {
-            task = mWatingTaskQueue.get(i);
+        	DownloadTask task = mWatingTaskQueue.get(i);
             if (task != null && task.getDownloadFile().getUrl().equals(url)) {
             	mWatingTaskQueue.remove(task);
             }
         }
-        for (int i = 0; i < mPausingTaskList.size(); i++) {
-            task = mPausingTaskList.get(i);
-            if (task != null && task.getDownloadFile().getUrl().equals(url)) {
+        for (DownloadTask task : mPausingTaskList) {
+        	if (task != null && task.getDownloadFile().getUrl().equals(url)) {
             	mPausingTaskList.remove(task);
             }
         }
     }
     
-	/**
-	 * 返回当前下载队列中任务的总个数。
-	 * @return
-	 */
-	public int getTotalTaskCount() {
-        return getQueueTaskCount() + getDownloadingTaskCount() + getPausingTaskCount();
+    /**
+     * 停止所有下载任务，并终止下载器。
+     */
+    public void close() {
+        isRunning = false;
+        pauseAllTask();
+        this.interrupt();
     }
+    
+    /**
+     * 暂停所有正在下载、等待下载的任务。
+     */
+    public synchronized void pauseAllTask() {
+        for (int i = 0; i < mWatingTaskQueue.size(); i++) {
+        	DownloadTask task = mWatingTaskQueue.get(i);
+            mWatingTaskQueue.remove(task);
+            if(task != null) {
+            	mPausingTaskList.add(task);
+            }
+        }
+		for (DownloadTask task : mDownloadingTaskList) {
+			if (task != null) {
+                pauseTask(task);
+            }
+		}
+    }
+    
+    /**
+     * 文件下载完成。
+     * @param task
+     */
+    public synchronized void completeTask(DownloadTask task) {
+        if (mDownloadingTaskList.contains(task)) {
+        	mDownloadingTaskList.remove(task);
+        	// 通知所有观察者，数据已经改变。
+        	Map<String,Object> params = new HashMap<String,Object>();
+    		params.put(DownloadObserver.KEY_TYPE, DownloadTypes.COMPLETE);
+    		params.put(DownloadObserver.KEY_FILE, task.getDownloadFile());
+    		params.put(DownloadObserver.KEY_LOCAL_PATH, task.getDownloadFileLocalPath());
+        	notifyObservers(params);
+        }
+    }
+    
+    /*
+     * 取消文件下载。
+     * @param task
+     */
+	private synchronized void onCanceledTask(DownloadTask task) {
+		// 通知所有观察者，数据已经改变。
+    	Map<String,Object> params = new HashMap<String,Object>();
+		params.put(DownloadObserver.KEY_TYPE, DownloadTypes.DELETE);
+		params.put(DownloadObserver.KEY_FILE, task.getDownloadFile());
+		params.put(DownloadObserver.KEY_LOCAL_PATH, task.getDownloadFileLocalPath());
+    	notifyObservers(params);
+	}
+	
+	/*
+	 * 文件下载出错。
+	 * @param task
+	 * @param t
+	 */
+	private synchronized void onErrorTask(DownloadTask task, Throwable error) {
+		if (error == null) {
+			error = new RuntimeException("unkown error");
+		}
+    	// 通知所有观察者，数据已经改变。
+    	Map<String,Object> params = new HashMap<String,Object>();
+		params.put(DownloadObserver.KEY_TYPE, DownloadStates.ERROR);
+		params.put(DownloadObserver.KEY_FILE, task.getDownloadFile());
+    	notifyObservers(params);
+        Toast.makeText(MainApplication.getInstance(), "Error: \n" + error.getMessage(), Toast.LENGTH_LONG).show();
+	} 
+	
+	/*
+	 * 文件暂停下载。
+	 */
+	private synchronized void onPausedTask(DownloadTask task) {
+		// 通知所有观察者，数据已经改变。
+    	Map<String,Object> params = new HashMap<String,Object>();
+		params.put(DownloadObserver.KEY_TYPE, DownloadTypes.PAUSE);
+		params.put(DownloadObserver.KEY_FILE, task.getDownloadFile());
+		params.put(DownloadObserver.KEY_LOCAL_PATH, task.getDownloadFileLocalPath());
+    	notifyObservers(params);
+	}
+    
+	
+	/**
+	 * 删除本地的缓存文件。
+	 * @param url
+	 */
+	public boolean deleteLocalFileByUrl(String url){
+		try {
+			URL localUrl = new URL(url);
+			String fileName = new File(localUrl.getFile()).getName();
+			File file = new File(StorageUtils.getDiskCacheDir(MainApplication.getInstance(), Config.CACHE_APK), fileName);
+			return file.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	
 	
 	public int getQueueTaskCount() {
         return mWatingTaskQueue.size();
@@ -355,6 +449,9 @@ public class Downloader extends Thread {
         return mPausingTaskList.size();
     }
 	
+    /*
+     * 等待下载的任务队列。
+     */
 	private class TaskQueue {
         private Queue<DownloadTask> taskQueue;
 
@@ -368,8 +465,9 @@ public class Downloader extends Thread {
 
         public DownloadTask poll() {
             DownloadTask task = null;
-            while (mDownloadingTaskList.size() >= MAX_DOWNLOAD_THREAD_COUNT
-                    || (task = taskQueue.poll()) == null) {
+            while (isRunning && (mDownloadingTaskList.size() >= MAX_DOWNLOAD_THREAD_COUNT
+                    || (task = taskQueue.poll()) == null)) {
+            	System.out.println("1秒后继续检测");//TODO
                 try {
                     Thread.sleep(1000); // sleep
                 } catch (InterruptedException e) {

@@ -53,6 +53,7 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
     private long totalTime;
     private Throwable error = null;
     private boolean interrupt = false;
+    private boolean pause = false;
 
     private final class ProgressReportingRandomAccessFile extends RandomAccessFile {
         private long progress = 0;
@@ -69,6 +70,7 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
             progress += count;
             if(System.currentTimeMillis() - NOTIFY_PROGRESS_INTERVAL >= previousPublishTime){
             	previousPublishTime = System.currentTimeMillis();
+            	System.out.println("更新！！！！！！！！！！！！！！！！ "+file.getName());//TODO
             	publishProgress(progress);
             }
         }
@@ -90,62 +92,23 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
         this.tempFile = new File(path, fileName + TEMP_SUFFIX);
     }
 
-    public DownloadFile getDownloadFile() {
-        return downloadFile;
-    }
-
-    public boolean isInterrupt() {
-        return interrupt;
-    }
-
-    public int getDownloadPercent() {
-        return downloadPercent;
-    }
-
-    public long getDownloadSize() {
-        return downloadSize + previousFileSize;
-    }
-
-    public long getTotalSize() {
-        return totalSize;
-    }
-
-    public long getDownloadSpeed() {
-        return this.networkSpeed;
-    }
-
-    public long getTotalTime() {
-        return this.totalTime;
-    }
-
-    public DownloadTaskListener getListener() {
-        return this.listener;
-    }
-    
-    /**
-     * 返回下载文件保存在本地的绝对路径。
-     * @return
-     */
-    public String getDownloadFileLocalPath(){
-    	return file.getAbsolutePath();
-    }
-
-    public String getDownloadFileLocalTempPath(){
-    	return tempFile.getAbsolutePath();
-    }
-    
     @Override
     protected void onPreExecute() {
         previousTime = System.currentTimeMillis();
-        if (listener != null)
-            listener.preDownload(this);
+        if (listener != null){
+        	listener.onPreExecute(this);
+        }
+        
+        System.out.println("onPreExecute  1"+getDownloadFile().getFileName());//TODO
     }
 
     @Override
     protected Long doInBackground(Void... params) {
         long result = -1;
         try {
+        	System.out.println("doInBackground  1"+getDownloadFile().getFileName());//TODO
             result = download();
+            System.out.println("doInBackground  2"+getDownloadFile().getFileName());//TODO
         } catch (NetworkErrorException e) {
             error = e;
         } catch (FileAlreadyExistException e) {
@@ -166,33 +129,20 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
     }
 
     @Override
-    protected void onProgressUpdate(Long... progress) {
-        if (progress.length > 1) {
-            totalSize = progress[1];
-            if (totalSize == -1) {
-                if (listener != null)
-                    listener.errorDownload(this, error);
-            } else {
-
-            }
-        } else {
-            totalTime = System.currentTimeMillis() - previousTime;
-            downloadSize = progress[0];
-            downloadPercent = (int) ((downloadSize + previousFileSize) * 100 / totalSize);
-            networkSpeed = downloadSize / totalTime;
-            if (listener != null)
-                listener.updateProgress(this);
-        }
-    }
-
-    @Override
     protected void onPostExecute(Long result) {
         if (result == -1 || interrupt || error != null) {
             if (DEBUG && error != null) {
                 Log.v(TAG, "Download failed." + error.getMessage());
             }
             if (listener != null) {
-                listener.errorDownload(this, error);
+				if (error != null) {
+					listener.onError(this, error);
+				}
+				if (pause) {
+					listener.onPaused(this);
+				} else if(interrupt) {
+					listener.onCanceled(this);
+				}
             }
             return;
         }
@@ -200,15 +150,46 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
         if(tempFile.length() > 0){
         	tempFile.renameTo(file);
         }
-        if (listener != null)
-            listener.finishDownload(this);
+        if (listener != null) {
+        	listener.onFinished(this);
+        }
+    }
+    
+    @Override
+    protected void onProgressUpdate(Long... progress) {
+    	// 如果传递了2个参数。
+        if (progress.length > 1) {
+            totalSize = progress[1];
+            if (totalSize == -1 && listener != null) {
+            	listener.onError(this, error);
+            }
+        } else {
+            totalTime = System.currentTimeMillis() - previousTime;
+            downloadSize = progress[0];
+            downloadPercent = (int) ((downloadSize + previousFileSize) * 100 / totalSize);
+            networkSpeed = downloadSize / totalTime;
+			if (listener != null) {
+				listener.onProgressChanged(this);
+			}
+        }
     }
 
-    @Override
-    public void onCancelled() {
-        super.onCancelled();
-        interrupt = true;
-    }
+    /**
+     * 停止任务的下载。
+     */
+	public void stop() {
+		interrupt = true;
+		System.out.println("onCancelled !!! "+file);//TODO
+	}
+    
+    /**
+     * 暂停任务的下载。
+     */
+	public void pause() {
+		// 标识当前Task是通过暂停方式来终止下载的。
+		pause = true;
+		stop();
+	}
 
     private AndroidHttpClient client;
     private HttpGet httpGet;
@@ -372,4 +353,47 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
 
     }
 
+    public DownloadFile getDownloadFile() {
+        return downloadFile;
+    }
+
+    public boolean isInterrupt() {
+        return interrupt;
+    }
+
+    public int getDownloadPercent() {
+        return downloadPercent;
+    }
+
+    public long getDownloadSize() {
+        return downloadSize + previousFileSize;
+    }
+
+    public long getTotalSize() {
+        return totalSize;
+    }
+
+    public long getDownloadSpeed() {
+        return this.networkSpeed;
+    }
+
+    public long getTotalTime() {
+        return this.totalTime;
+    }
+
+    public DownloadTaskListener getListener() {
+        return this.listener;
+    }
+    
+    /**
+     * 返回下载文件保存在本地的绝对路径。
+     * @return
+     */
+    public String getDownloadFileLocalPath(){
+    	return file.getAbsolutePath();
+    }
+
+    public String getDownloadFileLocalTempPath(){
+    	return tempFile.getAbsolutePath();
+    }
 }

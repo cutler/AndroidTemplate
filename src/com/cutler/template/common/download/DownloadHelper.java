@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.cutler.template.MainApplication;
+import com.cutler.template.common.download.DownloadManager.DownloadStates;
 import com.cutler.template.common.download.DownloadManager.DownloadTypes;
 import com.cutler.template.common.download.goal.DownloadObserver;
 import com.cutler.template.common.download.model.DownloadFile;
@@ -40,13 +41,14 @@ public class DownloadHelper {
 			OnProgressListener callback;
 			public void onDownloadDataChanged(Map<String, Object> params) {
 				DownloadFile file = (DownloadFile) params.get(DownloadObserver.KEY_FILE);
-				if(file.getUrl().equals(file.getUrl())){
+				if(file.getUrl().equals(downloadFile.getUrl())){
 					int type = (Integer) params.get(DownloadObserver.KEY_TYPE);
 					if (type == DownloadTypes.ADD) {
 						callback = NotificationUtils.showDownloadNotify(context, downloadFile.getFileName(), notifyIds.get(downloadFile.getUrl()));
-					} else if(type == DownloadTypes.PROGRESS) {
+					} else if(type == DownloadStates.PROGRESS) {
 						callback.onProgessChanged((Integer) params.get(DownloadObserver.KEY_PROGRESS));
 					} else if(type == DownloadTypes.COMPLETE) {
+						System.out.println(file+" , "+type);//TODO
 						NotificationUtils.cancelNotify(context, notifyIds.get(downloadFile.getUrl()));
 						notifyIds.remove(downloadFile.getUrl());
 						DownloadManager.getInstance().removeObserver(this);
@@ -59,11 +61,14 @@ public class DownloadHelper {
 							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 							MainApplication.getInstance().startActivity(intent);
 						}
-					} else if(type == DownloadTypes.ERROR) {
+					} else if(type == DownloadStates.ERROR || type == DownloadTypes.DELETE) {
+						System.out.println(file+" , "+type);//TODO
 						NotificationUtils.cancelNotify(context, notifyIds.get(downloadFile.getUrl()));
 						notifyIds.remove(downloadFile.getUrl());
 						DownloadManager.getInstance().removeObserver(this);
-						DownloadManager.getInstance().service(DownloadManager.DownloadTypes.DELETE, file);
+						if(type == DownloadStates.ERROR){
+							DownloadManager.getInstance().service(DownloadManager.DownloadTypes.DELETE, file);
+						}
 					}
 				}
 			}
