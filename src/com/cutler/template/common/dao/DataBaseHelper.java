@@ -16,22 +16,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	/** 数据库当前版本号 */
 	public static final int DB_VERSION = 1;
 
-	/**
-	 * 单例
-	 */
 	private static DataBaseHelper instances = null;
 	
-	public static DataBaseHelper getInstances(Context context) {
-		if (instances == null) {
-			synchronized (DataBaseHelper.class) {
-				if (instances == null) {
-					instances = new DataBaseHelper(context);
-				}
-			}
-		}
-		return instances;
-	}
-
 	/**
 	 * 关闭数据库
 	 */
@@ -94,5 +80,15 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		} catch (Exception e) { }
 		return result;
 	}
-
+	
+	public static DataBaseHelper getInstances(Context context) {
+		if (instances == null) {
+			synchronized (DataBaseHelper.class) {
+				if (instances == null) {
+					instances = new DataBaseHelper(context);
+				}
+			}
+		}
+		return instances;
+	}
 }

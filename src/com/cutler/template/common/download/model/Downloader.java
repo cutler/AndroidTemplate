@@ -26,7 +26,7 @@ import com.cutler.template.util.StorageUtils;
  * 下载器类。 
  * 维护了一个下载队列，并提供了对该队列的各种操作方法。 
  * 考虑到下载队列中可能存在n个下载任务，因此本类继承于Thread。
- *
+ * @author cutler
  */
 public class Downloader extends Thread {
 	private static final int MAX_TASK_COUNT = 100;
@@ -165,7 +165,6 @@ public class Downloader extends Thread {
 
             @Override
             public void onError(DownloadTask task, Throwable error) {
-            	System.out.println("onError  "+mWatingTaskQueue.size()+","+task.getDownloadFile().getFileName());//TODO
             	onErrorTask(task, error);
             }
 
@@ -224,7 +223,7 @@ public class Downloader extends Thread {
 	 * @param observer
 	 */
 	public void removeObserver(DownloadObserver observer) {
-		if (observers != null) {
+		if (observer != null) {
 			observers.remove(observer);
 		}
 	}
@@ -233,19 +232,15 @@ public class Downloader extends Thread {
      * 在主线程中，通知所有观察者数据已经改变。 
      */
     public void notifyObservers(final Map<String,Object> params){
-    	if(observers != null){
-    		mHandler.post(new Runnable() {
-				public void run() {
-					if(observers != null){
-						// 通知所有观察者，数据已经改变。
-		            	Iterator<DownloadObserver> iter = observers.iterator();
-		            	while(iter.hasNext()){
-		            		iter.next().onDownloadDataChanged(params);
-		            	}
-					}
-				}
-			});
-    	}
+		mHandler.post(new Runnable() {
+			public void run() {
+				// 通知所有观察者，数据已经改变。
+            	Iterator<DownloadObserver> iter = observers.iterator();
+            	while(iter.hasNext()){
+            		iter.next().onDownloadDataChanged(params);
+            	}
+			}
+		});
     }
     
     /**
@@ -467,7 +462,6 @@ public class Downloader extends Thread {
             DownloadTask task = null;
             while (isRunning && (mDownloadingTaskList.size() >= MAX_DOWNLOAD_THREAD_COUNT
                     || (task = taskQueue.poll()) == null)) {
-            	System.out.println("1秒后继续检测");//TODO
                 try {
                     Thread.sleep(1000); // sleep
                 } catch (InterruptedException e) {

@@ -70,7 +70,6 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
             progress += count;
             if(System.currentTimeMillis() - NOTIFY_PROGRESS_INTERVAL >= previousPublishTime){
             	previousPublishTime = System.currentTimeMillis();
-            	System.out.println("更新！！！！！！！！！！！！！！！！ "+file.getName());//TODO
             	publishProgress(progress);
             }
         }
@@ -98,17 +97,13 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
         if (listener != null){
         	listener.onPreExecute(this);
         }
-        
-        System.out.println("onPreExecute  1"+getDownloadFile().getFileName());//TODO
     }
 
     @Override
     protected Long doInBackground(Void... params) {
         long result = -1;
         try {
-        	System.out.println("doInBackground  1"+getDownloadFile().getFileName());//TODO
             result = download();
-            System.out.println("doInBackground  2"+getDownloadFile().getFileName());//TODO
         } catch (NetworkErrorException e) {
             error = e;
         } catch (FileAlreadyExistException e) {
@@ -179,7 +174,6 @@ public class DownloadTask extends AsyncTask<Void, Long, Long> {
      */
 	public void stop() {
 		interrupt = true;
-		System.out.println("onCancelled !!! "+file);//TODO
 	}
     
     /**

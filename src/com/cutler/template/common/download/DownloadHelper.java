@@ -18,7 +18,6 @@ import com.cutler.template.util.NotificationUtils.OnProgressListener;
 /**
  * 对DownloadManager类的再次封装，提供了多个下载的工具方法
  * @author cutler
- *
  */
 public class DownloadHelper {
 	// 全局的通知Id，每添加一个下载任务，都会让此Id加1。
@@ -48,7 +47,6 @@ public class DownloadHelper {
 					} else if(type == DownloadStates.PROGRESS) {
 						callback.onProgessChanged((Integer) params.get(DownloadObserver.KEY_PROGRESS));
 					} else if(type == DownloadTypes.COMPLETE) {
-						System.out.println(file+" , "+type);//TODO
 						NotificationUtils.cancelNotify(context, notifyIds.get(downloadFile.getUrl()));
 						notifyIds.remove(downloadFile.getUrl());
 						DownloadManager.getInstance().removeObserver(this);
@@ -62,7 +60,6 @@ public class DownloadHelper {
 							MainApplication.getInstance().startActivity(intent);
 						}
 					} else if(type == DownloadStates.ERROR || type == DownloadTypes.DELETE) {
-						System.out.println(file+" , "+type);//TODO
 						NotificationUtils.cancelNotify(context, notifyIds.get(downloadFile.getUrl()));
 						notifyIds.remove(downloadFile.getUrl());
 						DownloadManager.getInstance().removeObserver(this);

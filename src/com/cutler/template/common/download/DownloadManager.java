@@ -57,6 +57,9 @@ public class DownloadManager {
 				mDownloader.pauseTask(file[0]);
 			}
 			break;
+		case DownloadTypes.PAUSE_ALL:
+			mDownloader.pauseAllTask();
+			break;
 		case DownloadTypes.CONTINUE:
 			if (file[0] != null && !TextUtils.isEmpty(file[0].getUrl())) {
 				mDownloader.continueTask(file[0]);
@@ -86,27 +89,32 @@ public class DownloadManager {
 		/**
 		 * 添加一个新的下载任务
 		 */
-		public static final int ADD = 6;
+		public static final int ADD = 1;
 		
 		/**
 		 * 暂停下载
 		 */
-		public static final int PAUSE = 3;
+		public static final int PAUSE = 2;
+		
+		/**
+		 * 暂停所有下载（包括正在下载的和等待下载的）
+		 */
+		public static final int PAUSE_ALL = 3;
 		
 		/**
 		 * 继续下载
 		 */
-		public static final int CONTINUE = 5;
+		public static final int CONTINUE = 4;
 		
 		/**
 		 * 下载完成
 		 */
-		public static final int COMPLETE = 2;
+		public static final int COMPLETE = 5;
 		
 		/**
 		 * 删除下载
 		 */
-		public static final int DELETE = 4;
+		public static final int DELETE = 6;
 		
 		/**
 		 * 停止下载器。
@@ -123,12 +131,12 @@ public class DownloadManager {
 		/**
 		 * 下载进度改变
 		 */
-		public static final int PROGRESS = 1;
+		public static final int PROGRESS = 1001;
 		
 		/**
 		 * 下载出错
 		 */
-		public static final int ERROR = 2;
+		public static final int ERROR = 1002;
 		
 	}
 	
