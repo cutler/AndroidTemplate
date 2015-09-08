@@ -1,9 +1,0 @@
-.DS_Store
-Thumbs.db
-db.json
-debug.log
-public/
-.deploy/
-bin/
-gen/
-.settings/
