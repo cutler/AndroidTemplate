@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <VideoView
+        android:id="@+id/mVideoView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" />
+
+    <RelativeLayout
+        android:id="@+id/preview_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true">
+
+        <ImageView
+            android:id="@+id/preview_IV"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/biz_video_list_play_icon_big" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/controller_layout"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/biz_video_bar_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingLeft="15dp"
+        android:visibility="gone">
+
+        <CheckBox
+            android:id="@+id/playPauseBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="@drawable/tp_selector_radio_play_stop"
+            android:button="@null" />
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="45dp"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@+id/playPauseBtn"
+            android:progressDrawable="@drawable/player_setting_bright_progressbar"
+            android:thumb="@drawable/biz_video_progress_thumb"
+            android:thumbOffset="10dip" />
+
+        <TextView
+            android:id="@+id/timeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/seekbar"
+            android:layout_below="@+id/seekbar"
+            android:text="00:00/00:00"
+            android:textColor="@android:color/white"
+            android:textSize="13sp" />
+
+        <CheckBox
+            android:id="@+id/scaleScreenBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="15dp"
+            android:layout_centerVertical="true"
+            android:background="@drawable/tp_selector_radio_scale_screen"
+            android:button="@null" />
+    </RelativeLayout>
+</RelativeLayout>

@@ -16,6 +16,8 @@ import java.util.Map;
 
 /**
  * 通知工具类
+ *
+ * @author cutler
  */
 public class NotificationUtil {
 

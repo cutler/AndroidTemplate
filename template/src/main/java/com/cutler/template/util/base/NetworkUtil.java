@@ -36,7 +36,7 @@ public class NetworkUtil {
     public static final String NETWORKTYPE_WIFI = "wifi";
 
     /**
-     * 判断当时网络是否是wifi
+     * 判断当前网络是否是wifi
      */
     public static boolean isWifi(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

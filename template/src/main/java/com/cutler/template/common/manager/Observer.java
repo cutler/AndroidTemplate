@@ -1,7 +1,8 @@
 package com.cutler.template.common.manager;
 
 /**
- * Created by cuihu on 15/9/4.
+ *
+ * @author cutler
  */
 public interface Observer<T> {
     /**

@@ -17,6 +17,11 @@ import android.text.TextUtils;
 
 import java.util.List;
 
+/**
+ * 快捷方式工具类
+ *
+ * @author cutler
+ */
 public class ShortcutUtil {
     /**
      * 快捷方式已经存在，并且是当前应用程序创建出来的。
@@ -41,9 +46,9 @@ public class ShortcutUtil {
     /**
      * 在桌面上创建一个快捷方式。
      *
-     * @param clazz     点击快捷方式后，要启动的Activity
-     * @param icon      快捷方式的图标
-     * @param text 快捷方式的标题的资源Id
+     * @param clazz 点击快捷方式后，要启动的Activity
+     * @param icon  快捷方式的图标
+     * @param text  快捷方式的标题的资源Id
      */
     public static void createDesktopShortCut(Context context,
                                              Class<? extends Activity> clazz, Bitmap icon, String text) {

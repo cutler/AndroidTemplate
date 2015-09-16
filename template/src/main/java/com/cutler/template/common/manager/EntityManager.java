@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by cuihu on 15/9/4.
+ * Model管理类
+ *
+ * @author cutler
  */
 public class EntityManager<T> {
     // 保存所有注册到本Manager中的观察者。

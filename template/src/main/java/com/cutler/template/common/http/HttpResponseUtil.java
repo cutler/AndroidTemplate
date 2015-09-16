@@ -25,8 +25,7 @@ class HttpResponseUtil {
             // 若result的值为null，则视为网络连接有问题。
             errorName = "network";
         } else if (result instanceof JSONObject) {
-            // 如果result有值，但返回值不是JSONObject对象，那么就视为请求成功。
-            // 如果result有值，但返回值是JSONObject对象，则会进行下面的判断。
+            // 如果返回值不是JSONObject对象，那么就视为请求成功，否则会进行下面的判断。
             try {
                 JSONObject jsonObj = (JSONObject) result;
                 // 如果返回的json中包含了success字段，本次请求的结果就由success字段的值来决定，若没包含则直接视为成功。

@@ -13,11 +13,13 @@ import com.cutler.template.R;
 
 /*
 
+ 使用方法：
  xmlns:custom="http://schemas.android.com/apk/res-auto"
  <com.cutler.template.common.view.GifMovieView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             custom:gif="@drawable/my_animated_gif"/>
+
  */
 
 /**

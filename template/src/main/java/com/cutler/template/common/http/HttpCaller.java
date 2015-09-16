@@ -57,7 +57,7 @@ public class HttpCaller {
     }
 
     /**
-     * 本方法会在子线程中发送http请求，当请求结束后通过回调方法通知前端代码。
+     * 本方法会在子线程中发送http请求，当请求结束后，会在主线程中通过回调方法通知前端代码。
      *
      * @param url      请求的url
      * @param params   请求参数
@@ -199,7 +199,7 @@ public class HttpCaller {
      * @param input
      * @return
      */
-    public Object readInputStream(HttpURLConnection conn, InputStream input, Class clazz) throws Exception {
+    private Object readInputStream(HttpURLConnection conn, InputStream input, Class clazz) throws Exception {
         String cookie = conn.getHeaderField("set-cookie");
         if (cookie != null && cookie.trim().length() > 0) {
             // TODO 保存本次获取到的cookie

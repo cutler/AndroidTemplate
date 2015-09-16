@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 /**
  * 偏好文件操作类
+ *
  * @author cutler
  */
 public class SharedPreferencesUtil {

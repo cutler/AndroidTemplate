@@ -1,7 +1,7 @@
 package com.cutler.template.common.http;
 
 /**
- * 发送Http请求时所用到的回调接口，具体参看HttpCaller.service()方法
+ * 发送Http请求时所用到的回调接口，具体参看HttpTask类。
  *
  * @author cutler
  */
