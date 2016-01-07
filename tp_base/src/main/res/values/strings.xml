@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">tpBase</string>
+
+    <!-- 网络请求模块 -->
+    <string name="error_unknown">未知异常</string>
+    <string name="error_network">网络不给力啊</string>
+
+
+</resources>

@@ -1,15 +1,17 @@
 package com.cutler.testapplication.test.http;
 
 
-import com.cutler.template.common.http.HttpCaller;
-import com.cutler.template.common.http.HttpCaller.Method;
-import com.cutler.template.common.http.HttpHandler;
+import com.cutler.template.base.common.http.HttpCaller;
+import com.cutler.template.base.common.http.HttpCaller.Method;
+import com.cutler.template.base.common.http.HttpHandler;
+import com.cutler.template.base.common.http.HttpTask;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 /**
  * http模块的测试类
+ *
  * @author cutler
  */
 public class HttpTest {
@@ -20,7 +22,7 @@ public class HttpTest {
     public static void testGetByteRequest() {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("a", "北京市");
-        HttpCaller.getInstance().service(HttpCaller.base_url + "geocoding", params, new HttpHandler() {
+        HttpCaller.service(HttpCaller.base_url + "geocoding", params, new HttpHandler() {
             public void handleResult(Object result) {
                 try {
                     System.out.println("testGetByteRequest = " + new String((byte[]) result, "UTF-8"));
@@ -35,7 +37,7 @@ public class HttpTest {
      */
     public static void testGetStringRequest() {
         HashMap<String, String> params = new HashMap<String, String>();
-        HttpCaller.getInstance().service("http://www.baidu.com/", params, new HttpHandler() {
+        HttpCaller.service("http://www.baidu.com/", params, new HttpHandler() {
             public void handleResult(Object result) {
                 System.out.println("testGetStringRequest = " + result);
             }
@@ -48,7 +50,7 @@ public class HttpTest {
     public static void testPostStringRequest() {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("a", "北京市");
-        HttpCaller.getInstance().service(HttpCaller.base_url + "geocoding", params, new HttpHandler() {
+        HttpCaller.service(HttpCaller.base_url + "geocoding", params, new HttpHandler() {
             public void handleResult(Object result) {
                 System.out.println("testPostStringRequest = " + result);
             }
@@ -60,7 +62,7 @@ public class HttpTest {
      */
     public static void test404Request() {
         HashMap<String, String> params = new HashMap<String, String>();
-        HttpCaller.getInstance().service("http://gc.ditu.aliyun.com/geocoding2", params, new HttpHandler() {
+        HttpCaller.service("http://gc.ditu.aliyun.com/geocoding2", params, new HttpHandler() {
             public void handleResult(Object result) {
                 System.out.println("test404Request handleResult = " + result);
             }
@@ -79,7 +81,7 @@ public class HttpTest {
      */
     public static void testNetworkRequest() {
         HashMap<String, String> params = new HashMap<String, String>();
-        HttpCaller.getInstance().service("http://www.sfsd.sdfsfs", params, new HttpHandler() {
+        HttpCaller.service("http://www.sfsd.sdfsfs", params, new HttpHandler() {
             public void handleResult(Object result) {
                 System.out.println("testNetworkRequest handleResult = " + result);
             }
@@ -90,6 +92,30 @@ public class HttpTest {
                 return false;
             }
         });
+    }
+
+    /**
+     * 测试取消请求。
+     */
+    public static void testCancel() {
+        HashMap<String, String> params = new HashMap<String, String>();
+        HttpTask task = HttpCaller.service("http://www.sfsd.sdfsfs", params, new HttpHandler() {
+            public void handleResult(Object result) {
+                System.out.println("testCancel handleResult = " + result);
+            }
+
+            @Override
+            public boolean handleError(String result) {
+                System.out.println("testCancel handleError = " + result);
+                return false;
+            }
+
+            @Override
+            public void onCancelled() {
+                System.out.println("testCancel onCancelled");
+            }
+        });
+        task.cancel(true);
     }
 
 }

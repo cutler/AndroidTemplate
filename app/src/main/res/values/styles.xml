@@ -3,6 +3,10 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
+
+        <!-- 这两个样式是日期和时间选择器所要使用的 -->
+        <item name="numberPickerInputTextStyle">@style/AiWidget.EditText.NumberPickerInputText</item>
+        <item name="numberPickerStyle">@style/AiWidget.NumberPicker</item>
     </style>
 
 </resources>

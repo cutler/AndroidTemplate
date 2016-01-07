@@ -3,9 +3,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.cutler.template.util.view.VideoPlayer
+    <com.cutler.template.media.video.VideoPlayer
         android:id="@+id/viewPlayer1"
         android:layout_width="match_parent"
         android:layout_height="200dp" />
+
 
 </LinearLayout>

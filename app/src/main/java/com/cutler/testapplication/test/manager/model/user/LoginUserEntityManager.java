@@ -1,8 +1,8 @@
 package com.cutler.testapplication.test.manager.model.user;
 
-import com.cutler.template.Template;
-import com.cutler.template.common.manager.EntityManager;
-import com.cutler.template.util.io.IOUtil;
+import com.cutler.template.base.Template;
+import com.cutler.template.base.common.manager.EntityManager;
+import com.cutler.template.base.util.io.IOUtil;
 
 import org.json.JSONObject;
 

@@ -1,30 +1,39 @@
 package com.cutler.testapplication;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-import com.cutler.template.util.base.AppUtil;
-import com.cutler.template.util.view.VideoPlayer;
+import com.cutler.template.base.common.view.dialog.DatePickerDialog;
+import com.cutler.template.base.ui.BaseActivity;
+import com.cutler.template.media.video.VideoPlayer;
+import com.cutler.testapplication.test.http.HttpTest;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.util.Calendar;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends BaseActivity {
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentViewWithLoading(R.layout.activity_main);
 
-        init(R.id.viewPlayer1, "http://app.eyitan.com/upload/product/2015/07/22/143755023166524.mp4","http://app.eyitan.com/upload/product/2015/07/22/14375503337903.png");
-//        init(R.id.viewPlayer2,"http://app.eyitan.com/upload/product/2015/07/22/143754682685738.mp4","http://app.eyitan.com/upload/product/2015/07/22/143754687330179.png");
+//        init(R.id.viewPlayer1, "http://app.eyitan.com/upload/product/2015/07/22/143755023166524.mp4","http://app.eyitan.com/upload/product/2015/07/22/14375503337903.png");
     }
 
-    private void init(int viewId,String videoUrl, String imgUrl) {
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
+    private void init(int viewId, String videoUrl, String imgUrl) {
         VideoPlayer videoPlayer = (VideoPlayer) findViewById(viewId);
         videoPlayer.setUrl(videoUrl);
         ImageView imgIV = videoPlayer.getPreviewImageView();
@@ -39,12 +48,10 @@ public class MainActivity extends ActionBarActivity {
         videoPlayer.setOnFullScreenListener(new VideoPlayer.OnFullScreenListener() {
             @Override
             public void onChanged(boolean isFullScrren) {
-                if(isFullScrren){
+                if (isFullScrren) {
                     getSupportActionBar().hide();
-                    AppUtil.openFullScreen(MainActivity.this);
                 } else {
                     getSupportActionBar().show();
-                    AppUtil.closeFullScreen(MainActivity.this);
                 }
             }
         });
@@ -71,4 +78,6 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

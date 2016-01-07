@@ -2,7 +2,7 @@ package com.cutler.testapplication;
 
 import android.app.Application;
 
-import com.cutler.template.Template;
+import com.cutler.template.base.Template;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 

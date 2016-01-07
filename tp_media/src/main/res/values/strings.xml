@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">tp_media</string>
+
+    <!-- 视频播放 -->
+    <string name="video_url_error">无效的视频地址</string>
+    <string name="download_doing">正在下载%1$s，已完成%2$d%%</string>
+</resources>
