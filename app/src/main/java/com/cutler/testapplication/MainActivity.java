@@ -30,7 +30,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
     }
 
     private void init(int viewId, String videoUrl, String imgUrl) {

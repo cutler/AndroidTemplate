@@ -18,6 +18,18 @@
   注意：在使用 `tp_base` 或 `tp_translaod` 里的类之前，需要调用 `Template.init(getApplication());` 方法初始化。
 
 <br>
+## 推荐阅读 ##
+  如果你对笔者设计的项目架构感兴趣，可以参阅笔者写的下面三篇博文：
+
+  [《架构篇　第一章 通用项目架构》](http://cutler.github.io/android-H01/)
+
+  [《架构篇　第二章 Model数据管理》](http://cutler.github.io/android-H02/)
+
+  [《架构篇　第三章 高效Android编程》](http://cutler.github.io/android-H03/)
+
+  欢迎提出建议。
+
+<br>
 ## 提示 ##
    本项目主要是笔者自己使用，所以也就并不打算写详细的文档。
 
